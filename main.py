@@ -58,10 +58,16 @@ def main(args):
     data_tensor = torch.tensor(data, dtype=torch.float32).to(DEVICE)
     labels_tensor = torch.tensor(labels, dtype=torch.float32).to(DEVICE)
 
-    network = Net().to(DEVICE)
     dataloader = DataLoader(list(zip(data_tensor, labels_tensor)), shuffle=True, batch_size=args.batch_size)
 
-    training_perf = train_network(dataloader, network, training_params)
+    network = Net()
+    training_perf = None
+    while training_perf is None:
+        network = Net().to(DEVICE)
+        training_perf = train_network(dataloader, network, training_params)
+
+        if training_perf is None:
+            logging.info("Training the network failed, restarting")
 
     validation_data_tensor = torch.FloatTensor(generate_xor_data(1000)).to(DEVICE)
     validation_perf = evaluate_network(validation_data_tensor, network, xor_function)
