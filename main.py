@@ -8,8 +8,8 @@ import torch
 import torch.nn as nn
 from torch.utils.data import DataLoader
 
-from training import (OPTIMIZER_TYPES, CRITERION_TYPES, 
-    DEVICE, TrainingParameters, train_network, show_result)
+from training import (add_training_params_to_parser,
+        DEVICE, TrainingParameters, train_network, show_result)
 
 class Net(nn.Module):
     def __init__(self):
@@ -66,22 +66,22 @@ def main(args):
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(prog='pytorch-playground')
+    parser = argparse.ArgumentParser(prog='pytorch-testing')
+    add_training_params_to_parser(parser)
 
-    parser.add_argument('--epochs', type=int, default=5000,
-                        help="number of epochs to run")
-    parser.add_argument('--batch-size', type=int, default=100,
-                        help="number samples per batch")
-    parser.add_argument('-lr', '--learning_rate', type=float, default=0.001,
-                        help="learning rate of optimizer")
-    parser.add_argument('--criterion', type=str, default="mse",
-                        choices=CRITERION_TYPES.keys(),
-                        help="criterion to compute loss")
-    parser.add_argument('--optimizer', type=str, default="sgd",
-                        choices=OPTIMIZER_TYPES.keys(),
-                        help="optimizer to learn")
+    parser.add_argument('-ll', '--logging-level', type=int, default=logging.INFO,
+                        choices=[logging.ERROR, logging.INFO, logging.DEBUG],
+                        help=f"logging level to use: {logging.ERROR}=ERROR, {logging.INFO}=INFO, "
+                        +f"{logging.DEBUG}=DEBUG, higher number means less output")
+    parser.add_argument('-lo', '--logging-output', type=str, default="stderr",
+                        help="option to log to file. If option is not specified, all output is sent to stderr")
 
-    logging.basicConfig(#filename='program.log',
-                        level=logging.INFO)
 
-    main(parser.parse_args())
+    parsed_args = parser.parse_args()
+
+    if parsed_args.logging_output == "stderr":
+        logging.basicConfig(level=parsed_args.logging_level)
+    else:
+        logging.basicConfig(filename=parsed_args.logging_output, level=parsed_args.logging_level)
+
+    main(parsed_args)

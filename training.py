@@ -8,9 +8,9 @@ import torch.optim as optim
 from torch.utils.data import DataLoader
 
 
-DEVICE = torch.device("cuda")
+DEVICE = torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu")
 
-CRITERION_TYPES = {
+LOSS_FN_TYPES = {
     "crossentropy": nn.CrossEntropyLoss,
     "mse": nn.MSELoss,
     "l1": nn.L1Loss,
@@ -28,14 +28,29 @@ OPTIMIZER_TYPES = {
 class TrainingParameters:
     epochs: int
     learning_rate: float
-    criterion_type: Callable
+    loss_fn_type: Callable
     optimizer: Callable
 
     def __init__(self, args):
         self.epochs = args.epochs
         self.learning_rate = args.learning_rate
-        self.criterion_type = CRITERION_TYPES[args.criterion.lower()]
+        self.loss_fn_type = LOSS_FN_TYPES[args.loss_fn.lower()]
         self.optimizer = OPTIMIZER_TYPES[args.optimizer.lower()]
+
+
+def add_training_params_to_parser(parser):
+    parser.add_argument('-ep', '--epochs', type=int, default=5000,
+                        help="number of epochs to run")
+    parser.add_argument('-bs', '--batch-size', type=int, default=100,
+                        help="number of samples per batch")
+    parser.add_argument('-lr', '--learning_rate', type=float, default=0.001,
+                        help="learning rate of optimizer")
+    parser.add_argument('-lf', '--loss-fn', type=str, default="mse",
+                        choices=LOSS_FN_TYPES.keys(),
+                        help="loss function to use to compute loss")
+    parser.add_argument('-op', '--optimizer', type=str, default="sgd",
+                        choices=OPTIMIZER_TYPES.keys(),
+                        help="optimizer to use to learn")
 
 
 def optimizer_factory(network, training_params: TrainingParameters):
@@ -50,7 +65,7 @@ def optimizer_factory(network, training_params: TrainingParameters):
 
 
 def train_network(dataloader: DataLoader, network: nn.Module, training_params: TrainingParameters) -> nn.Module:
-    criterion = training_params.criterion_type()
+    loss_fn = training_params.loss_fn_type()
     optimizer = optimizer_factory(network, training_params)
 
     for epoch in range(training_params.epochs):
@@ -59,7 +74,7 @@ def train_network(dataloader: DataLoader, network: nn.Module, training_params: T
         for data, labels in dataloader:
             optimizer.zero_grad()
             output = network(data)
-            loss = criterion(output, labels)
+            loss = loss_fn(output, labels)
             loss.backward()        
             optimizer.step()
             running_loss += loss.item()
@@ -85,3 +100,5 @@ def show_result(input: torch.Tensor, network: nn.Module, evaluator: Callable):
         logging.debug(f"{input} \t=>\t {output.item()} | {correct}")
 
     print(f"{correct_count}/{len(results)} correct ({(correct_count/len(results)*100):.1f}%)")
+
+
