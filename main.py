@@ -1,5 +1,6 @@
 #!/usr/bin/python3
 
+from collections.abc import Callable
 import argparse
 import logging
 import random
@@ -8,9 +9,9 @@ import torch
 import torch.nn as nn
 from torch.utils.data import DataLoader
 
-from training import (add_training_params_to_parser,
-        DEVICE, TrainingParameters, evaluate_network, print_network_evaluation_as_csv, 
-                      print_network_evaluation_as_human_readable, train_network)
+from training import (add_training_params_to_parser, print_network_evaluation,
+        DEVICE, evaluate_network, get_training_parameters_from_args, train_network)
+
 
 class Net(nn.Module):
     def __init__(self):
@@ -48,39 +49,37 @@ def generate_xor_data(n: int):
     return data
 
 
-def main(args):
-    logging.info(f"Started program with the following args: {args}")
-    training_params = TrainingParameters(args)
+def generate_dataloader(data_generator: Callable, data_evaluator: Callable,
+                        training_size: int, batch_size: int) -> DataLoader:
 
-    data = generate_xor_data(1000)
-    labels = [[xor_function(pair)] for pair in data]
+    data = data_generator(training_size)
+    labels = [[data_evaluator(pair)] for pair in data]
 
     data_tensor = torch.tensor(data, dtype=torch.float32).to(DEVICE)
     labels_tensor = torch.tensor(labels, dtype=torch.float32).to(DEVICE)
 
-    dataloader = DataLoader(list(zip(data_tensor, labels_tensor)), shuffle=True, batch_size=args.batch_size)
+    return DataLoader(list(zip(data_tensor, labels_tensor)), shuffle=True, batch_size=batch_size)
 
-    network = Net()
-    training_perf = None
-    while training_perf is None:
-        network = Net().to(DEVICE)
-        training_perf = train_network(dataloader, network, training_params)
 
-        if training_perf is None:
-            logging.info("Training the network failed, restarting")
+def generate_network() -> nn.Module:
+    return Net().to(DEVICE)
 
-    validation_data_tensor = torch.FloatTensor(generate_xor_data(1000)).to(DEVICE)
+
+def main(args):
+    logging.info(f"Started program with the following args: {args}")
+
+    training_params = get_training_parameters_from_args(args)
+    training_dataloader = generate_dataloader(generate_xor_data, xor_function, args.training_size, args.batch_size)
+    training_perf, network = train_network(training_dataloader, training_params, generate_network)
+
+    validation_data_tensor = torch.FloatTensor(generate_xor_data(args.validation_size)).to(DEVICE)
     validation_perf = evaluate_network(validation_data_tensor, network, xor_function)
 
-
-    if args.output_format == "human":
-        print_network_evaluation_as_human_readable(training_perf, validation_perf)
-    else:
-        print_network_evaluation_as_csv(training_params, training_perf, validation_perf)
+    print_network_evaluation(args.output_format, training_params, training_perf, validation_perf)
 
 
 
-if __name__ == "__main__":
+def setup_argument_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(prog='pytorch-testing')
     add_training_params_to_parser(parser)
 
@@ -88,17 +87,27 @@ if __name__ == "__main__":
                         choices=[logging.ERROR, logging.INFO, logging.DEBUG],
                         help=f"logging level to use: {logging.ERROR}=ERROR, {logging.INFO}=INFO, "
                         +f"{logging.DEBUG}=DEBUG, higher number means less output")
+    parser.add_argument('-ts', '--training-size', type=int, default=1000,
+                        help="specifies how many training data is generated")
+    parser.add_argument('-vs', '--validation-size', type=int, default=1000,
+                        help="specifies how many validation data is generated")
     parser.add_argument('-lo', '--logging-output', type=str, default="stderr",
                         help="option to log to file. If option is not specified, all output is sent to stderr")
     parser.add_argument('-of', '--output-format', type=str, default="csv", choices=["csv","human"],
                         help="output format, default is csv")
+    return parser
 
 
-    parsed_args = parser.parse_args()
-
-    if parsed_args.logging_output == "stderr":
-        logging.basicConfig(level=parsed_args.logging_level)
+def setup_logger(arguments):
+    if arguments.logging_output == "stderr":
+        logging.basicConfig(level=arguments.logging_level)
     else:
-        logging.basicConfig(filename=parsed_args.logging_output, level=parsed_args.logging_level)
+        logging.basicConfig(filename=arguments.logging_output, level=arguments.logging_level)
+
+
+if __name__ == "__main__":
+    parser = setup_argument_parser()
+    parsed_args = parser.parse_args()
+    setup_logger(parsed_args)
 
     main(parsed_args)

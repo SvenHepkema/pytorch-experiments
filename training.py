@@ -71,20 +71,13 @@ class ValidationPerformance:
         return f"{self.validation_count},{self.correct_validation_count},"
 
 
-@dataclass
+@dataclass(frozen=True)
 class TrainingParameters:
     epochs: int
     learning_rate: float
     loss_stop: float
     loss_fn_type: Callable
     optimizer: Callable
-
-    def __init__(self, args):
-        self.epochs = args.epochs
-        self.learning_rate = args.learning_rate
-        self.loss_stop = args.loss_stop
-        self.loss_fn_type = LOSS_FN_TYPES[args.loss_fn.lower()]
-        self.optimizer = OPTIMIZER_TYPES[args.optimizer.lower()]
 
     def get_as_csv_string(self) -> str:
         def get_key_with_value(dictionary, value):
@@ -93,6 +86,14 @@ class TrainingParameters:
         return (f"{self.epochs},{self.learning_rate},"
             +f"{get_key_with_value(LOSS_FN_TYPES, self.loss_fn_type)},"
             +f"{get_key_with_value(OPTIMIZER_TYPES, self.optimizer)},")
+
+
+def get_training_parameters_from_args(args) -> TrainingParameters:
+    return TrainingParameters(args.epochs,
+        args.learning_rate,
+        args.loss_stop,
+        LOSS_FN_TYPES[args.loss_fn.lower()],
+        OPTIMIZER_TYPES[args.optimizer.lower()])
 
 
 def add_training_params_to_parser(parser):
@@ -125,7 +126,7 @@ def optimizer_factory(network, training_params: TrainingParameters):
     return optimizer
 
 
-def train_network(dataloader: DataLoader, network: nn.Module, 
+def train_network_with_stop(dataloader: DataLoader, network: nn.Module, 
                   training_params: TrainingParameters) -> TrainingPerformance | None:
     loss_fn = training_params.loss_fn_type()
     optimizer = optimizer_factory(network, training_params)
@@ -158,6 +159,23 @@ def train_network(dataloader: DataLoader, network: nn.Module,
     end_time = time.time() 
 
     return TrainingPerformance(end_time - start_time, first_loss, running_loss)
+
+
+def train_network(training_data: DataLoader, training_params: TrainingParameters,
+                       network_generator: Callable[[], nn.Module]) -> tuple[TrainingPerformance, nn.Module]:
+    training_perf = None
+    network = network_generator()
+
+    while training_perf is None:
+        training_perf = train_network_with_stop(training_data, network, training_params)
+
+        if training_perf is None:
+            logging.info("Training the network failed, restarting")
+            network = network_generator()
+        else:
+            break
+    
+    return training_perf, network
 
 
 def evaluate_network(validation_data: torch.Tensor, network: nn.Module, 
@@ -195,3 +213,12 @@ def print_network_evaluation_as_csv(training_params: TrainingParameters,
     print(training_params.get_as_csv_string() 
             + training_perf.get_as_csv_string()
             + validation_perf.get_as_csv_string())
+
+def print_network_evaluation(output_format: str,
+        training_params: TrainingParameters, 
+        training_perf: TrainingPerformance,
+        validation_perf: ValidationPerformance):
+    if output_format == "human":
+        print_network_evaluation_as_human_readable(training_perf, validation_perf)
+    else:
+        print_network_evaluation_as_csv(training_params, training_perf, validation_perf)
