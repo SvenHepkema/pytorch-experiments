@@ -1,6 +1,7 @@
 from collections.abc import Callable
 from dataclasses import dataclass
 import logging
+import time
 
 import torch
 import torch.nn as nn
@@ -50,6 +51,25 @@ OPTIMIZER_TYPES = {
     "rprop": optim.Rprop,
 }
 
+@dataclass(frozen=True)
+class TrainingPerformance:
+    training_time: float
+    first_loss: float
+    last_loss: float
+
+    def get_as_csv_string(self) -> str:
+        return (f"{self.first_loss},{self.last_loss}," 
+                +f"{self.first_loss-self.last_loss:.15f},{self.training_time},")
+
+
+@dataclass(frozen=True)
+class ValidationPerformance:
+    validation_count: int
+    correct_validation_count: int
+
+    def get_as_csv_string(self) -> str:
+        return f"{self.validation_count},{self.correct_validation_count},"
+
 
 @dataclass
 class TrainingParameters:
@@ -63,6 +83,14 @@ class TrainingParameters:
         self.learning_rate = args.learning_rate
         self.loss_fn_type = LOSS_FN_TYPES[args.loss_fn.lower()]
         self.optimizer = OPTIMIZER_TYPES[args.optimizer.lower()]
+
+    def get_as_csv_string(self) -> str:
+        def get_key_with_value(dictionary, value):
+            return list(dictionary.keys())[list(dictionary.values()).index(value)]
+
+        return (f"{self.epochs},{self.learning_rate},"
+            +f"{get_key_with_value(LOSS_FN_TYPES, self.loss_fn_type)},"
+            +f"{get_key_with_value(OPTIMIZER_TYPES, self.optimizer)},")
 
 
 def add_training_params_to_parser(parser):
@@ -91,10 +119,15 @@ def optimizer_factory(network, training_params: TrainingParameters):
     return optimizer
 
 
-def train_network(dataloader: DataLoader, network: nn.Module, training_params: TrainingParameters) -> nn.Module:
+def train_network(dataloader: DataLoader, network: nn.Module, 
+                  training_params: TrainingParameters) -> TrainingPerformance:
     loss_fn = training_params.loss_fn_type()
     optimizer = optimizer_factory(network, training_params)
 
+    start_time = time.time()
+
+    first_loss = 0.0
+    running_loss = 0.0
     for epoch in range(training_params.epochs):
         running_loss = 0.0
 
@@ -107,25 +140,47 @@ def train_network(dataloader: DataLoader, network: nn.Module, training_params: T
             running_loss += loss.item()
             
         if epoch % 100 == 0:
+            if epoch == 0:
+                first_loss = running_loss
             logging.info(f"epoch {epoch} loss: {running_loss}")
 
-    return network 
+    end_time = time.time() 
+
+    return TrainingPerformance(end_time - start_time, first_loss, running_loss)
 
 
-def show_result(input: torch.Tensor, network: nn.Module, evaluator: Callable):
+def evaluate_network(validation_data: torch.Tensor, network: nn.Module, 
+                     evaluator: Callable) -> ValidationPerformance:
+    """ Returns the number of correctly predicted labels for each record in validation data."""
+
+    correct_count = 0
+    output = network(validation_data)
+    results = list(zip(validation_data, output))
+    for validation_data, output in results:
+        correct = int(round(evaluator(validation_data))) == int(round(output.item()))
+        correct_count += int(correct)
+        logging.debug(f"{validation_data} \t=>\t {output.item()} | {correct}")
+
+    return ValidationPerformance(len(results), correct_count)
+
+
+def print_network_evaluation_as_human_readable(
+        training_perf: TrainingPerformance, 
+        validation_perf: ValidationPerformance):
+    percentage_correct = (validation_perf.correct_validation_count
+                          /validation_perf.validation_count*100)
+
     print("")
     print("")
     print("====================")
     print("Finished training...")
-
-    correct_count = 0
-    output = network(input)
-    results = list(zip(input, output))
-    for input, output in results:
-        correct = int(round(evaluator(input))) == int(round(output.item()))
-        correct_count += int(correct)
-        logging.debug(f"{input} \t=>\t {output.item()} | {correct}")
-
-    print(f"{correct_count}/{len(results)} correct ({(correct_count/len(results)*100):.1f}%)")
+    print(f"{validation_perf.correct_validation_count}/{validation_perf.validation_count} correct "
+          +f"({percentage_correct:.1f}%) in {training_perf.training_time}s")
 
 
+def print_network_evaluation_as_csv(training_params: TrainingParameters, 
+                                    training_perf: TrainingPerformance,
+                                    validation_perf: ValidationPerformance):
+    print(training_params.get_as_csv_string() 
+            + training_perf.get_as_csv_string()
+            + validation_perf.get_as_csv_string())

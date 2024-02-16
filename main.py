@@ -9,7 +9,8 @@ import torch.nn as nn
 from torch.utils.data import DataLoader
 
 from training import (add_training_params_to_parser,
-        DEVICE, TrainingParameters, train_network, show_result)
+        DEVICE, TrainingParameters, evaluate_network, print_network_evaluation_as_csv, 
+                      print_network_evaluation_as_human_readable, train_network)
 
 class Net(nn.Module):
     def __init__(self):
@@ -46,6 +47,7 @@ def generate_xor_data(n: int):
 
     return data
 
+
 def main(args):
     logging.info(f"Started program with the following args: {args}")
     training_params = TrainingParameters(args)
@@ -59,10 +61,17 @@ def main(args):
     network = Net().to(DEVICE)
     dataloader = DataLoader(list(zip(data_tensor, labels_tensor)), shuffle=True, batch_size=args.batch_size)
 
-    train_network(dataloader, network, training_params)
+    training_perf = train_network(dataloader, network, training_params)
 
     validation_data_tensor = torch.FloatTensor(generate_xor_data(1000)).to(DEVICE)
-    show_result(validation_data_tensor, network, xor_function)
+    validation_perf = evaluate_network(validation_data_tensor, network, xor_function)
+
+
+    if args.output_format == "human":
+        print_network_evaluation_as_human_readable(training_perf, validation_perf)
+    else:
+        print_network_evaluation_as_csv(training_params, training_perf, validation_perf)
+
 
 
 if __name__ == "__main__":
@@ -75,6 +84,8 @@ if __name__ == "__main__":
                         +f"{logging.DEBUG}=DEBUG, higher number means less output")
     parser.add_argument('-lo', '--logging-output', type=str, default="stderr",
                         help="option to log to file. If option is not specified, all output is sent to stderr")
+    parser.add_argument('-of', '--output-format', type=str, default="csv", choices=["csv","human"],
+                        help="output format, default is csv")
 
 
     parsed_args = parser.parse_args()
