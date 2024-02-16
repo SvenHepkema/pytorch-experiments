@@ -19,8 +19,19 @@ LOSS_FN_TYPES = {
 }
 
 OPTIMIZER_TYPES = {
+    "adadelta": optim.Adadelta,
+    "adagrad": optim.Adagrad,
+    "adam": optim.Adam,
+    "adamw": optim.AdamW,
+    "adamsparse": optim.SparseAdam,
+    "adamax": optim.Adamax,
+    "asgd": optim.ASGD,
     "sgd": optim.SGD,
-    "adam": optim.Adam
+    # "lbfgs": optim.LBFGS,  FIX: not usable until closure parameter is added
+    "nadam": optim.NAdam,
+    "radam": optim.RAdam,
+    "rmsprop": optim.RMSprop,
+    "rprop": optim.Rprop,
 }
 
 
