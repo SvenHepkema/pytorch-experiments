@@ -4,8 +4,8 @@ import random
 import torch
 import torch.nn as nn
 
-from pytorchexperiments.pytorchutils.constants import DEVICE
-from pytorchexperiments.networks.experiment import Experiment
+from pytorchexperiments.torchutils.constants import DEVICE
+from pytorchexperiments.functions.experiment import Experiment
 
 
 class _XORNet(nn.Module):

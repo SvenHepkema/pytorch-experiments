@@ -7,11 +7,11 @@ import torch
 import torch.nn as nn
 from torch.utils.data import DataLoader
 
-from pytorchexperiments.pytorchutils.argparseutils import (
+from pytorchexperiments.utils.argparseutils import (
     get_training_parameters_from_args,
 )
-from pytorchexperiments.pytorchutils.training import evaluate_network, train_network
-from pytorchexperiments.pytorchutils.dataclasses import (
+from pytorchexperiments.torchutils.training import evaluate_network, train_network
+from pytorchexperiments.torchutils.dataclasses import (
     TrainingParameters,
     TrainingPerformance,
     ValidationPerformance,

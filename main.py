@@ -2,16 +2,21 @@
 
 import argparse
 import logging
-from pytorchexperiments.networks.xor import get_xor_experiment
 
-from pytorchexperiments.pytorchutils.argparseutils import add_training_params_to_parser
-from pytorchexperiments.pytorchutils.dataclasses import print_network_evaluation
+from pytorchexperiments.utils.argparseutils import add_training_params_to_parser
+from pytorchexperiments.functions.funcs import (
+    get_experiment_from_args,
+    FUNCTION_EXPERIMENTS,
+)
+from pytorchexperiments.torchutils.dataclasses import print_network_evaluation
 
 
 def main(args: argparse.Namespace):
     logging.info(f"Started program with the following args: {args}")
 
-    training_params, training_perf, validation_perf = get_xor_experiment(args).run()
+    training_params, training_perf, validation_perf = get_experiment_from_args(
+        args
+    ).run()
     print_network_evaluation(
         args.output_format, training_params, training_perf, validation_perf
     )
@@ -21,6 +26,12 @@ def setup_argument_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(prog="pytorch-testing")
     add_training_params_to_parser(parser)
 
+    parser.add_argument(
+        "function",
+        type=str,
+        choices=FUNCTION_EXPERIMENTS.keys(),
+        help="specify the function to learn",
+    )
     parser.add_argument(
         "-ll",
         "--logging-level",

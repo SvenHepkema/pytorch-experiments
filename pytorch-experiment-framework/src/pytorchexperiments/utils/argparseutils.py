@@ -1,8 +1,10 @@
-from .constants import LOSS_FN_TYPES, OPTIMIZER_TYPES
-from .dataclasses import TrainingParameters
+import argparse
+
+from pytorchexperiments.torchutils.constants import LOSS_FN_TYPES, OPTIMIZER_TYPES
+from pytorchexperiments.torchutils.dataclasses import TrainingParameters
 
 
-def add_training_params_to_parser(parser):
+def add_training_params_to_parser(parser: argparse.ArgumentParser):
     parser.add_argument(
         "-ep", "--epochs", type=int, default=5000, help="number of epochs to run"
     )
@@ -43,7 +45,7 @@ def add_training_params_to_parser(parser):
     )
 
 
-def get_training_parameters_from_args(args) -> TrainingParameters:
+def get_training_parameters_from_args(args: argparse.Namespace) -> TrainingParameters:
     return TrainingParameters(
         args.epochs,
         args.learning_rate,
