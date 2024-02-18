@@ -11,12 +11,13 @@ from .constants import LOSS_FN_TYPES, OPTIMIZER_TYPES
 class TrainingPerformance:
     training_time: float
     first_loss: float
+    last_interval_loss: float
     last_loss: float
 
     def get_as_csv_string(self) -> str:
         return (
-            f"{self.first_loss},{self.last_loss},"
-            + f"{self.first_loss-self.last_loss:.15f},{self.training_time},"
+            f"{self.first_loss},{self.last_interval_loss},{self.last_loss},"
+            + f"{self.training_time},"
         )
 
 
@@ -33,6 +34,7 @@ class ValidationPerformance:
 class TrainingParameters:
     epochs: int
     learning_rate: float
+    loss_restart: float
     loss_stop: float
     loss_fn_type: Callable
     optimizer: Callable

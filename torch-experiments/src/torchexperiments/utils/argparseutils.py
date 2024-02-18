@@ -19,16 +19,25 @@ def add_training_params_to_parser(parser: argparse.ArgumentParser):
         help="learning rate of optimizer",
     )
     parser.add_argument(
-        "-ls",
+        "-lor",
+        "--loss-restart",
+        type=float,
+        default=0.0,
+        help="restart the learning process if the epochs in the first interval"
+        + " result in less loss minimization than the specified percentage. "
+        + "If 0 (default), there is no restart and the training will never be restarted",
+    )
+    parser.add_argument(
+        "-los",
         "--loss-stop",
         type=float,
         default=0.0,
-        help="restart the learning process if the first 100 epochs"
-        + " result in less loss minimization than the specified percentage. "
-        + "If 0 (default), there is no stop and the training will never be restarted",
+        help="stop the learning process if there is less loss minimization"
+        + " than the specified percentage. "
+        + "If 0 (default), there is no stop and the training will never be stopped",
     )
     parser.add_argument(
-        "-lf",
+        "-lof",
         "--loss-fn",
         type=str,
         default="mse",
@@ -49,6 +58,7 @@ def get_training_parameters_from_args(args: argparse.Namespace) -> TrainingParam
     return TrainingParameters(
         args.epochs,
         args.learning_rate,
+        args.loss_restart,
         args.loss_stop,
         LOSS_FN_TYPES[args.loss_fn.lower()],
         OPTIMIZER_TYPES[args.optimizer.lower()],
