@@ -3,5 +3,5 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [project]
-name = "pytorchexperiments"
+name = "torchexperiments"
 version = "0.0.1"

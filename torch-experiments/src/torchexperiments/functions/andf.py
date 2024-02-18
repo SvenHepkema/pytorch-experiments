@@ -4,8 +4,8 @@ import random
 import torch
 import torch.nn as nn
 
-from pytorchexperiments.torchutils.constants import DEVICE
-from pytorchexperiments.functions.experiment import Experiment
+from torchexperiments.torchutils.constants import DEVICE
+from torchexperiments.functions.experiment import Experiment
 
 
 class _ANDNet(nn.Module):

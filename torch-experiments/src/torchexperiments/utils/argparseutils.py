@@ -1,7 +1,7 @@
 import argparse
 
-from pytorchexperiments.torchutils.constants import LOSS_FN_TYPES, OPTIMIZER_TYPES
-from pytorchexperiments.torchutils.dataclasses import TrainingParameters
+from torchexperiments.torchutils.constants import LOSS_FN_TYPES, OPTIMIZER_TYPES
+from torchexperiments.torchutils.dataclasses import TrainingParameters
 
 
 def add_training_params_to_parser(parser: argparse.ArgumentParser):

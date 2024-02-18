@@ -3,12 +3,12 @@
 import argparse
 import logging
 
-from pytorchexperiments.utils.argparseutils import add_training_params_to_parser
-from pytorchexperiments.functions.funcs import (
+from torchexperiments.utils.argparseutils import add_training_params_to_parser
+from torchexperiments.functions.funcs import (
     get_experiment_from_args,
     FUNCTION_EXPERIMENTS,
 )
-from pytorchexperiments.torchutils.dataclasses import print_network_evaluation
+from torchexperiments.torchutils.dataclasses import print_network_evaluation
 
 
 def main(args: argparse.Namespace):
