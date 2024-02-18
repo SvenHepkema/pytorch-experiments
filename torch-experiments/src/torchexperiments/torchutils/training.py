@@ -44,15 +44,30 @@ def train_network_with_stop(
 
             if epoch == training_params.epoch_interval:
                 loss_restart_threshold = first_loss * (1 - training_params.loss_restart)
-                if training_params.loss_restart != 0.0 and loss_restart_threshold < running_loss:
+                if (
+                    training_params.loss_restart != 0.0
+                    and loss_restart_threshold < running_loss
+                ):
                     return None
             elif epoch > training_params.epoch_interval:
-                loss_stop_threshold = last_interval_loss * (1 - training_params.loss_stop)
-                if training_params.loss_stop != 0.0 and loss_stop_threshold < running_loss:
-                    return TrainingPerformance(time.time() - start_time, first_loss, last_interval_loss, running_loss)
+                loss_stop_threshold = last_interval_loss * (
+                    1 - training_params.loss_stop
+                )
+                if (
+                    training_params.loss_stop != 0.0
+                    and loss_stop_threshold < running_loss
+                ):
+                    return TrainingPerformance(
+                        time.time() - start_time,
+                        first_loss,
+                        last_interval_loss,
+                        running_loss,
+                    )
             last_interval_loss = running_loss
 
-    return TrainingPerformance(time.time() - start_time, first_loss, last_interval_loss, running_loss)
+    return TrainingPerformance(
+        time.time() - start_time, first_loss, last_interval_loss, running_loss
+    )
 
 
 def train_network(
