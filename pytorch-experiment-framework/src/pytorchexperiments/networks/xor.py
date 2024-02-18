@@ -1,4 +1,3 @@
-
 from collections.abc import Callable
 import argparse
 import random
@@ -6,18 +5,18 @@ import random
 import torch
 import torch.nn as nn
 
-from pytorchexperiments.pytorchutils.constants import  DEVICE
+from pytorchexperiments.pytorchutils.constants import DEVICE
 from pytorchexperiments.networks.experiment import Experiment
 
 
 class _XORNet(nn.Module):
     def __init__(self):
         super(_XORNet, self).__init__()
-        self.fc1 = nn.Linear(2, 60) 
+        self.fc1 = nn.Linear(2, 60)
         self.fc2 = nn.Linear(60, 1)
         self.rl1 = nn.ReLU()
         self.rl2 = nn.ReLU()
-	
+
     def forward(self, x):
         x = self.fc1(x)
         x = self.rl1(x)
@@ -56,10 +55,10 @@ def _evaluate_xor(gates: tuple):
 
 def get_xor_experiment(args: argparse.Namespace) -> Experiment:
     return Experiment(
-            args = args,
-            network_generator=_generate_xor_network,
-            function_evaluator=_evaluate_xor,
-            data_generator=_generate_xor_data,
-            data_to_tensor_converter=_convert_xor_data_to_tensor,
-            label_to_tensor_converter=_convert_xor_data_to_tensor,
-            )
+        args=args,
+        network_generator=_generate_xor_network,
+        function_evaluator=_evaluate_xor,
+        data_generator=_generate_xor_data,
+        data_to_tensor_converter=_convert_xor_data_to_tensor,
+        label_to_tensor_converter=_convert_xor_data_to_tensor,
+    )

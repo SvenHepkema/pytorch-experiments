@@ -6,12 +6,17 @@ import torch
 import torch.nn as nn
 from torch.utils.data import DataLoader
 
-from .dataclasses import (TrainingParameters, TrainingPerformance, 
-                        ValidationPerformance, optimizer_factory)
+from .dataclasses import (
+    TrainingParameters,
+    TrainingPerformance,
+    ValidationPerformance,
+    optimizer_factory,
+)
 
 
-def train_network_with_stop(dataloader: DataLoader, network: nn.Module, 
-                  training_params: TrainingParameters) -> TrainingPerformance | None:
+def train_network_with_stop(
+    dataloader: DataLoader, network: nn.Module, training_params: TrainingParameters
+) -> TrainingPerformance | None:
     loss_fn = training_params.loss_fn_type()
     optimizer = optimizer_factory(network, training_params)
 
@@ -26,10 +31,10 @@ def train_network_with_stop(dataloader: DataLoader, network: nn.Module,
             optimizer.zero_grad()
             output = network(data)
             loss = loss_fn(output, labels)
-            loss.backward()        
+            loss.backward()
             optimizer.step()
             running_loss += loss.item()
-            
+
         if epoch % 100 == 0:
             logging.info(f"epoch {epoch} loss: {running_loss}")
 
@@ -37,16 +42,19 @@ def train_network_with_stop(dataloader: DataLoader, network: nn.Module,
                 first_loss = running_loss
 
             if epoch == 100 and training_params.loss_stop != 0.0:
-                if first_loss * (1-training_params.loss_stop) < running_loss:
+                if first_loss * (1 - training_params.loss_stop) < running_loss:
                     return None
 
-    end_time = time.time() 
+    end_time = time.time()
 
     return TrainingPerformance(end_time - start_time, first_loss, running_loss)
 
 
-def train_network(training_data: DataLoader, training_params: TrainingParameters,
-                       network_generator: Callable[[], nn.Module]) -> tuple[TrainingPerformance, nn.Module]:
+def train_network(
+    training_data: DataLoader,
+    training_params: TrainingParameters,
+    network_generator: Callable[[], nn.Module],
+) -> tuple[TrainingPerformance, nn.Module]:
     training_perf = None
     network = network_generator()
 
@@ -58,13 +66,14 @@ def train_network(training_data: DataLoader, training_params: TrainingParameters
             network = network_generator()
         else:
             break
-    
+
     return training_perf, network
 
 
-def evaluate_network(validation_data: torch.Tensor, network: nn.Module, 
-                     evaluator: Callable) -> ValidationPerformance:
-    """ Returns the number of correctly predicted labels for each record in validation data."""
+def evaluate_network(
+    validation_data: torch.Tensor, network: nn.Module, evaluator: Callable
+) -> ValidationPerformance:
+    """Returns the number of correctly predicted labels for each record in validation data."""
 
     correct_count = 0
     output = network(validation_data)
@@ -75,5 +84,3 @@ def evaluate_network(validation_data: torch.Tensor, network: nn.Module,
         logging.debug(f"{validation_data} \t=>\t {output.item()} | {correct}")
 
     return ValidationPerformance(len(results), correct_count)
-
-
