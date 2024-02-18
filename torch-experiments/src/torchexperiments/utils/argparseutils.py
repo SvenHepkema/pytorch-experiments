@@ -52,6 +52,14 @@ def add_training_params_to_parser(parser: argparse.ArgumentParser):
         choices=OPTIMIZER_TYPES.keys(),
         help="optimizer to use to learn",
     )
+    parser.add_argument(
+        "-ei",
+        "--epoch-interval",
+        type=int,
+        default=100,
+        help="interval in which the loss conditions is checked and the"
+        + " current running loss is logged during the training process",
+    )
 
 
 def get_training_parameters_from_args(args: argparse.Namespace) -> TrainingParameters:
@@ -60,6 +68,7 @@ def get_training_parameters_from_args(args: argparse.Namespace) -> TrainingParam
         args.learning_rate,
         args.loss_restart,
         args.loss_stop,
+        args.epoch_interval,
         LOSS_FN_TYPES[args.loss_fn.lower()],
         OPTIMIZER_TYPES[args.optimizer.lower()],
     )

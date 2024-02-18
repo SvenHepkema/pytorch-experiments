@@ -36,6 +36,7 @@ class TrainingParameters:
     learning_rate: float
     loss_restart: float
     loss_stop: float
+    epoch_interval: int
     loss_fn_type: Callable
     optimizer: Callable
 
@@ -44,7 +45,7 @@ class TrainingParameters:
             return list(dictionary.keys())[list(dictionary.values()).index(value)]
 
         return (
-            f"{self.epochs},{self.learning_rate},"
+            f"{self.epochs},{self.learning_rate},{self.epoch_interval},"
             + f"{get_key_with_value(LOSS_FN_TYPES, self.loss_fn_type)},"
             + f"{get_key_with_value(OPTIMIZER_TYPES, self.optimizer)},"
         )
