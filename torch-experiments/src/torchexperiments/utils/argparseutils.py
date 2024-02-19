@@ -48,7 +48,7 @@ def add_training_params_to_parser(parser: argparse.ArgumentParser):
         "-op",
         "--optimizer",
         type=str,
-        default="sgd",
+        default="adam",
         choices=OPTIMIZER_TYPES.keys(),
         help="optimizer to use to learn",
     )
