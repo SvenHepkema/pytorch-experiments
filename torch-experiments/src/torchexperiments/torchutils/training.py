@@ -37,7 +37,7 @@ def train_network_with_stop(
             optimizer.step()
             running_loss += loss.item()
 
-        if epoch == 0:
+        if epoch == 1:
             first_loss = running_loss
 
         if epoch % training_params.epoch_interval == 0:
