@@ -8,15 +8,16 @@ import torch.nn as nn
 from torchexperiments.torchutils.constants import DEVICE
 from torchexperiments.functions.experiment import Experiment
 
-_LENGTH_INPUTS = 3
+_LENGTH_INPUTS = 10
 _DECIMAL_PREDICTION_PRECISION = 2
+_MIDDLE_LAYER_SIZE = 100
 
 
 class _AVGNet(nn.Module):
     def __init__(self):
         super(_AVGNet, self).__init__()
-        self.fc1 = nn.Linear(_LENGTH_INPUTS, 60)
-        self.fc2 = nn.Linear(60, 1)
+        self.fc1 = nn.Linear(_LENGTH_INPUTS, _MIDDLE_LAYER_SIZE)
+        self.fc2 = nn.Linear(_MIDDLE_LAYER_SIZE, 1)
         self.rl1 = nn.ReLU()
         self.rl2 = nn.ReLU()
 
