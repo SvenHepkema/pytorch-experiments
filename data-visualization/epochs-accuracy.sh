@@ -3,4 +3,4 @@ if [ $# -ne 1 ]; then
 	exit -1
 fi
 
-cat $1 | awk -F, '{print $1, $10}' | gnuplot -p -e "plot '-' with points pt 5; pause -1"
+cat $1 | awk -F, '{print $1, $11}' | gnuplot -p -e "plot '-' with points pt 5; pause -1"
