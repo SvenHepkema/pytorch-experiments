@@ -26,6 +26,7 @@ class Experiment:
     data_generator: Callable[[int], Any]
     data_to_tensor_converter: Callable[..., torch.Tensor]
     label_to_tensor_converter: Callable[..., torch.Tensor]
+    label_equalness_evaluator: Callable[[Any, torch.Tensor], bool]
 
     def _generate_dataloader(self) -> DataLoader:
         data = self.data_generator(self.args.training_size)
@@ -53,7 +54,10 @@ class Experiment:
             self.data_generator(self.args.validation_size)
         )
         validation_perf = evaluate_network(
-            validation_data_tensor, network, self.function_evaluator
+            validation_data_tensor,
+            network,
+            self.function_evaluator,
+            self.label_equalness_evaluator,
         )
 
         return training_params, training_perf, validation_perf

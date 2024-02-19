@@ -1,6 +1,7 @@
 import logging
 import time
 from collections.abc import Callable
+from typing import Any
 
 import torch
 import torch.nn as nn
@@ -91,7 +92,10 @@ def train_network(
 
 
 def evaluate_network(
-    validation_data: torch.Tensor, network: nn.Module, evaluator: Callable
+    validation_data: torch.Tensor,
+    network: nn.Module,
+    data_evaluator: Callable,
+    label_equalness_evaluator: Callable[[Any, torch.Tensor], bool],
 ) -> ValidationPerformance:
     """Returns the number of correctly predicted labels for each record in validation data."""
 
@@ -99,7 +103,7 @@ def evaluate_network(
     output = network(validation_data)
     results = list(zip(validation_data, output))
     for validation_data, output in results:
-        correct = int(round(evaluator(validation_data))) == int(round(output.item()))
+        correct = label_equalness_evaluator(data_evaluator(validation_data), output)
         correct_count += int(correct)
         logging.debug(f"{validation_data} \t=>\t {output.item()} | {correct}")
 

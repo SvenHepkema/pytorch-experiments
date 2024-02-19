@@ -1,5 +1,6 @@
 import argparse
 import random
+from typing import Any
 
 import torch
 import torch.nn as nn
@@ -52,6 +53,10 @@ def _evaluate_and(gates: tuple):
         return 0.0
 
 
+def _evaluate_if_labels_are_equal(label: Any, output: torch.Tensor) -> bool:
+    return int(round(label)) == int(round(output.item()))
+
+
 def get_and_experiment(args: argparse.Namespace) -> Experiment:
     return Experiment(
         args=args,
@@ -60,4 +65,5 @@ def get_and_experiment(args: argparse.Namespace) -> Experiment:
         data_generator=_generate_and_data,
         data_to_tensor_converter=_convert_and_data_to_tensor,
         label_to_tensor_converter=_convert_and_data_to_tensor,
+        label_equalness_evaluator=_evaluate_if_labels_are_equal,
     )
