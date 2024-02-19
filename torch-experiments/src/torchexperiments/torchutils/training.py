@@ -103,8 +103,11 @@ def evaluate_network(
     output = network(validation_data)
     results = list(zip(validation_data, output))
     for validation_data, output in results:
-        correct = label_equalness_evaluator(data_evaluator(validation_data), output)
+        evaluation = data_evaluator(validation_data)
+        correct = label_equalness_evaluator(evaluation, output)
         correct_count += int(correct)
-        logging.debug(f"{validation_data} \t=>\t {output.item()} | {correct}")
+        logging.debug(
+            f"{validation_data} \t=>\t {output.item()} (should be: {evaluation} | {correct}"
+        )
 
     return ValidationPerformance(len(results), correct_count)
