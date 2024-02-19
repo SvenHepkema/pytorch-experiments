@@ -56,11 +56,11 @@ def setup_argument_parser() -> argparse.ArgumentParser:
         help="specifies how many validation data is generated",
     )
     parser.add_argument(
-        "-lo",
-        "--logging-output",
+        "-lf",
+        "--log-file",
         type=str,
         default="stderr",
-        help="option to log to file. If option is not specified, all output is sent to stderr",
+        help="option to write log messages to a file. If the option is not specified, all logging messages are sent to stderr",
     )
     parser.add_argument(
         "-of",

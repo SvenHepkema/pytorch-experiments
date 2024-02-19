@@ -19,17 +19,17 @@ You can run the `main.py` script with any of the arguments below. The script is 
 - `-h`, `--help` Show all available parameters.
 - `-ep`, `--epochs`, Number of epochs to run.
 - `-bs`, `--batch`, Number of samples per batch.
-- `-lr`, `--learning_rate`, Learning rate of optimizer.
-- `-lor`, `--loss`, Restart the learning process if the epochs in the first interval result in less loss minimization than the specified percentage. If 0 (default), there is no restart and the training will never be restarted.
-- `-los`, `--loss`, Stop the learning process if there is less loss minimization than the specified percentage. If 0 (default), there is no stop and the training will never be stopped.
-- `-lof`, `--loss`, Loss function to use to compute loss. The options are listed in the section below.
+- `-lr`, `--learning-rate`, Learning rate of optimizer.
+- `-lor`, `--loss-restart`, Restart the learning process if the epochs in the first interval result in less loss minimization than the specified percentage. If 0 (default), there is no restart and the training will never be restarted.
+- `-los`, `--loss-stop`, Stop the learning process if there is less loss minimization than the specified percentage. If 0 (default), there is no stop and the training will never be stopped.
+- `-lof`, `--loss-function`, Loss function to use to compute loss. The options are listed in the section below.
 - `-op`, `--optimizer`, Optimizer to use to learn. The options are listed in the section below.
-- `-ei`, `--epoch`, Interval in which the loss conditions is checked and the current running loss is logged during the training process.
-- `-ll`, `--logging`, Logging level to use: 40=ERROR, 20=INFO, 10=DEBUG, higher number means less output.
-- `-ts`, `--training`, Specifies how much training data is generated.
-- `-vs`, `--validation`, Specifies how much validation data is generated.
-- `-lo`, `--logging`, Option to log to file. If option is not specified, all output is sent to stderr.
-- `-of`, `--output`, Output format, default is `csv`, other option is `human`.
+- `-ei`, `--epoch-interval`, Interval in which the loss conditions is checked and the current running loss is logged during the training process.
+- `-ll`, `--logging-level`, Logging level to use: 40=ERROR, 20=INFO, 10=DEBUG, higher number means less output.
+- `-ts`, `--training-size`, Specifies how much training data is generated.
+- `-vs`, `--validation-size`, Specifies how much validation data is generated.
+- `-lf`, `--logging-file`, Option to log to file. If option is not specified, all output is sent to stderr.
+- `-of`, `--output-format`, Output format, default is `csv`, other option is `human`.
 
 # Functions
 

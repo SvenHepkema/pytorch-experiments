@@ -13,7 +13,7 @@ def add_training_params_to_parser(parser: argparse.ArgumentParser):
     )
     parser.add_argument(
         "-lr",
-        "--learning_rate",
+        "--learning-rate",
         type=float,
         default=0.001,
         help="learning rate of optimizer",
