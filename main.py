@@ -17,6 +17,7 @@ def main(args: argparse.Namespace):
     training_params, training_perf, validation_perf = get_experiment_from_args(
         args
     ).run()
+
     print_network_evaluation(
         args.output_format, training_params, training_perf, validation_perf
     )
@@ -74,10 +75,10 @@ def setup_argument_parser() -> argparse.ArgumentParser:
 
 
 def setup_logger(args: argparse.Namespace):
-    if args.logging_output == "stderr":
+    if args.log_file == "stderr":
         logging.basicConfig(level=args.logging_level)
     else:
-        logging.basicConfig(filename=args.logging_output, level=args.logging_level)
+        logging.basicConfig(filename=args.log_file, level=args.logging_level)
 
 
 if __name__ == "__main__":
