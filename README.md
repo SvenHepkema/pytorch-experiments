@@ -4,7 +4,9 @@ pytorch-experiments
 
 There is a [framework](torch-experiments/src/torchexperiments) in this repository that can be used to experiment with training [PyTorch](https://github.com/pytorch/pytorch) neural networks. It focuses on experimenting with different parameters during training of the neural networks as they learn a mathematical function. Mathematical functions are easy to write, can be endlessly complex and you can generate millions of records of data and labels automatically. The framework however is designed to be generic in the way it trains networks, so you should also be able to test an image classifying network for example. There is also a [script](main.py) that you can use to execute experiments with the framework using the command line.
 
-For analysis purposes, there are [scripts](data-collection) that use [GNU Parallel](https://www.gnu.org/software/parallel/) to generate the data and [scripts](data-visualization) that use [gnuplot](http://www.gnuplot.info/) to visualize the data.
+For analysis purposes, there are [scripts](data-collection) that use [GNU Parallel](https://www.gnu.org/software/parallel/) to generate the data and [scripts](data-visualization) that use [gnuplot](http://www.gnuplot.info/) to visualize the data. For example, this is a plot showing the accuracy of a network when learning the `xor` function, for multiple counts of training epochs and middle layer sizes:
+
+<img src="documentation/example-visualization.svg" />
 
 # CLI Tool
 
