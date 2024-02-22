@@ -3,7 +3,10 @@
 import argparse
 import logging
 
-from torchexperiments.utils.argparseutils import add_training_params_to_parser
+from torchexperiments.utils.argparseutils import (
+    add_network_params_to_parser,
+    add_training_params_to_parser,
+)
 from torchexperiments.functions.funcs import (
     get_experiment_from_args,
     FUNCTION_EXPERIMENTS,
@@ -14,18 +17,23 @@ from torchexperiments.torchutils.dataclasses import print_network_evaluation
 def main(args: argparse.Namespace):
     logging.info(f"Started program with the following args: {args}")
 
-    training_params, training_perf, validation_perf = get_experiment_from_args(
-        args
-    ).run()
+    training_params, network_params, training_perf, validation_perf = (
+        get_experiment_from_args(args).run()
+    )
 
     print_network_evaluation(
-        args.output_format, training_params, training_perf, validation_perf
+        args.output_format,
+        training_params,
+        network_params,
+        training_perf,
+        validation_perf,
     )
 
 
 def setup_argument_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(prog="pytorch-testing")
     add_training_params_to_parser(parser)
+    add_network_params_to_parser(parser)
 
     parser.add_argument(
         "function",

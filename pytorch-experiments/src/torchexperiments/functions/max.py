@@ -7,18 +7,28 @@ import torch.nn as nn
 
 from torchexperiments.torchutils.constants import DEVICE
 from torchexperiments.functions.experiment import Experiment
+from torchexperiments.torchutils.dataclasses import NetworkParameters
 
 _LENGTH_INPUTS = 10
 _DECIMAL_PREDICTION_PRECISION = 2
-_MIDDLE_LAYER_SIZE = 300
+_DEFAULT_FIRST_MIDDLE_LAYER_SIZE = 300
+_DEFAULT_SECOND_MIDDLE_LAYER_SIZE = 300
 
 
 class _MAXNet(nn.Module):
-    def __init__(self):
+    def __init__(self, network_params: NetworkParameters):
         super(_MAXNet, self).__init__()
-        self.fc1 = nn.Linear(_LENGTH_INPUTS, _MIDDLE_LAYER_SIZE)
-        self.fc2 = nn.Linear(_MIDDLE_LAYER_SIZE, _MIDDLE_LAYER_SIZE)
-        self.fc3 = nn.Linear(_MIDDLE_LAYER_SIZE, 1)
+
+        first_middle_layer_size = network_params.get_first_layer_size(
+            _DEFAULT_FIRST_MIDDLE_LAYER_SIZE
+        )
+        second_middle_layer_size = network_params.get_second_layer_size(
+            _DEFAULT_SECOND_MIDDLE_LAYER_SIZE
+        )
+
+        self.fc1 = nn.Linear(_LENGTH_INPUTS, first_middle_layer_size)
+        self.fc2 = nn.Linear(first_middle_layer_size, second_middle_layer_size)
+        self.fc3 = nn.Linear(second_middle_layer_size, 1)
         self.rl1 = nn.ReLU()
         self.rl2 = nn.ReLU()
         self.rl3 = nn.ReLU()
@@ -34,8 +44,8 @@ class _MAXNet(nn.Module):
         return x
 
 
-def _generate_max_network() -> nn.Module:
-    return _MAXNet().to(DEVICE)
+def _generate_max_network(network_params: NetworkParameters) -> nn.Module:
+    return _MAXNet(network_params).to(DEVICE)
 
 
 def _generate_max_data(n: int):

@@ -4,7 +4,16 @@ from collections.abc import Callable
 import torch.nn as nn
 import torch.optim as optim
 
-from .constants import LOSS_FN_TYPES, OPTIMIZER_TYPES
+from .constants import (
+    ACTIVATION_TYPES,
+    ARGPARSE_USE_DEFAULT_STR,
+    LOSS_FN_TYPES,
+    OPTIMIZER_TYPES,
+)
+
+
+def _get_key_with_value(dictionary, value):
+    return list(dictionary.keys())[list(dictionary.values()).index(value)]
 
 
 @dataclass(frozen=True)
@@ -41,13 +50,58 @@ class TrainingParameters:
     optimizer: Callable
 
     def get_as_csv_string(self) -> str:
-        def get_key_with_value(dictionary, value):
-            return list(dictionary.keys())[list(dictionary.values()).index(value)]
 
         return (
             f"{self.epochs},{self.learning_rate},{self.epoch_interval},"
-            + f"{get_key_with_value(LOSS_FN_TYPES, self.loss_fn_type)},"
-            + f"{get_key_with_value(OPTIMIZER_TYPES, self.optimizer)},"
+            + f"{_get_key_with_value(LOSS_FN_TYPES, self.loss_fn_type)},"
+            + f"{_get_key_with_value(OPTIMIZER_TYPES, self.optimizer)},"
+        )
+
+
+@dataclass(frozen=True)
+class NetworkParameters:
+    first_layer_size: int
+    first_layer_activation: str
+    second_layer_size: int
+    second_layer_activation: str
+
+    def get_first_layer_size(self, default: int) -> int:
+        return default if self.first_layer_size == -1 else self.first_layer_size
+
+    def has_second_layer(self) -> bool:
+        return self.second_layer_size != 0
+
+    def get_second_layer_size(self, default: int) -> int:
+        if not self.has_second_layer():
+            raise Exception(
+                "Second layer size cannot be retrieved if no second layer should be used."
+            )
+
+        return default if self.second_layer_size == -1 else self.second_layer_size
+
+    def get_first_layer_activation(self, default: Callable) -> Callable:
+        return (
+            default
+            if self.first_layer_activation == ARGPARSE_USE_DEFAULT_STR
+            else ACTIVATION_TYPES[self.first_layer_activation.lower()]
+        )
+
+    def get_second_layer_activation(self, default: Callable) -> Callable:
+        if not self.has_second_layer():
+            raise Exception(
+                "Second layer activation cannot be retrieved if no second layer should be used."
+            )
+
+        return (
+            default
+            if self.second_layer_activation == ARGPARSE_USE_DEFAULT_STR
+            else ACTIVATION_TYPES[self.second_layer_activation.lower()]
+        )
+
+    def get_as_csv_string(self) -> str:
+        return (
+            f"{self.first_layer_size}," + f"{self.first_layer_activation},"
+            f"{self.second_layer_size}," + f"{self.second_layer_activation},"
         )
 
 
@@ -87,11 +141,13 @@ def print_network_evaluation_as_human_readable(
 
 def print_network_evaluation_as_csv(
     training_params: TrainingParameters,
+    network_params: NetworkParameters,
     training_perf: TrainingPerformance,
     validation_perf: ValidationPerformance,
 ):
     print(
         training_params.get_as_csv_string()
+        + network_params.get_as_csv_string()
         + training_perf.get_as_csv_string()
         + validation_perf.get_as_csv_string()
     )
@@ -100,10 +156,13 @@ def print_network_evaluation_as_csv(
 def print_network_evaluation(
     output_format: str,
     training_params: TrainingParameters,
+    network_params: NetworkParameters,
     training_perf: TrainingPerformance,
     validation_perf: ValidationPerformance,
 ):
     if output_format == "human":
         print_network_evaluation_as_human_readable(training_perf, validation_perf)
     else:
-        print_network_evaluation_as_csv(training_params, training_perf, validation_perf)
+        print_network_evaluation_as_csv(
+            training_params, network_params, training_perf, validation_perf
+        )

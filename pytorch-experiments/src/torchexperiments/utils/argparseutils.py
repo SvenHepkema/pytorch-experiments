@@ -1,7 +1,15 @@
 import argparse
 
-from torchexperiments.torchutils.constants import LOSS_FN_TYPES, OPTIMIZER_TYPES
-from torchexperiments.torchutils.dataclasses import TrainingParameters
+from torchexperiments.torchutils.constants import (
+    ACTIVATION_TYPES,
+    ARGPARSE_USE_DEFAULT_STR,
+    LOSS_FN_TYPES,
+    OPTIMIZER_TYPES,
+)
+from torchexperiments.torchutils.dataclasses import (
+    NetworkParameters,
+    TrainingParameters,
+)
 
 
 def add_training_params_to_parser(parser: argparse.ArgumentParser):
@@ -79,4 +87,46 @@ def get_training_parameters_from_args(args: argparse.Namespace) -> TrainingParam
         args.epoch_interval,
         LOSS_FN_TYPES[args.loss_fn.lower()],
         OPTIMIZER_TYPES[args.optimizer.lower()],
+    )
+
+
+def add_network_params_to_parser(parser: argparse.ArgumentParser):
+    parser.add_argument(
+        "-s1l",
+        "--size-first-layer",
+        type=int,
+        default=-1,
+        help="Size of first middle layer. If -1 (default), the network uses it's own default.",
+    )
+    parser.add_argument(
+        "-a1l",
+        "--activation-first-layer",
+        type=str,
+        default=ARGPARSE_USE_DEFAULT_STR,
+        choices=list(ACTIVATION_TYPES.keys()) + [ARGPARSE_USE_DEFAULT_STR],
+        help="Activation function of first middle layer. If not specified, the math function uses it's own default.",
+    )
+    parser.add_argument(
+        "-s2l",
+        "--size-second-layer",
+        type=int,
+        default=-1,
+        help="Size of second middle layer. If -1 (default), the network uses it's own default. If 0, no second middle layer is used",
+    )
+    parser.add_argument(
+        "-a2l",
+        "--activation-second-layer",
+        type=str,
+        default=ARGPARSE_USE_DEFAULT_STR,
+        choices=list(ACTIVATION_TYPES.keys()) + [ARGPARSE_USE_DEFAULT_STR],
+        help="Activation function of second middle layer. If not specified, the math function uses it's own default.",
+    )
+
+
+def get_network_parameters_from_args(args: argparse.Namespace) -> NetworkParameters:
+    return NetworkParameters(
+        args.size_first_layer,
+        args.activation_first_layer,
+        args.size_second_layer,
+        args.activation_second_layer,
     )

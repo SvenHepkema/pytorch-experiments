@@ -8,10 +8,12 @@ import torch.nn as nn
 from torch.utils.data import DataLoader
 
 from torchexperiments.utils.argparseutils import (
+    get_network_parameters_from_args,
     get_training_parameters_from_args,
 )
 from torchexperiments.torchutils.training import evaluate_network, train_network
 from torchexperiments.torchutils.dataclasses import (
+    NetworkParameters,
     TrainingParameters,
     TrainingPerformance,
     ValidationPerformance,
@@ -21,7 +23,7 @@ from torchexperiments.torchutils.dataclasses import (
 @dataclass(frozen=True)
 class Experiment:
     args: argparse.Namespace
-    network_generator: Callable[[], nn.Module]
+    network_generator: Callable[[NetworkParameters], nn.Module]
     function_evaluator: Callable[..., Any]
     data_generator: Callable[[int], Any]
     data_to_tensor_converter: Callable[..., torch.Tensor]
@@ -43,11 +45,17 @@ class Experiment:
 
     def run(
         self,
-    ) -> tuple[TrainingParameters, TrainingPerformance, ValidationPerformance]:
+    ) -> tuple[
+        TrainingParameters,
+        NetworkParameters,
+        TrainingPerformance,
+        ValidationPerformance,
+    ]:
         training_params = get_training_parameters_from_args(self.args)
+        network_params = get_network_parameters_from_args(self.args)
         training_dataloader = self._generate_dataloader()
         training_perf, network = train_network(
-            training_dataloader, training_params, self.network_generator
+            training_dataloader, training_params, network_params, self.network_generator
         )
 
         validation_data_tensor = self.data_to_tensor_converter(
@@ -60,4 +68,4 @@ class Experiment:
             self.label_equalness_evaluator,
         )
 
-        return training_params, training_perf, validation_perf
+        return training_params, network_params, training_perf, validation_perf

@@ -8,6 +8,7 @@ import torch.nn as nn
 from torch.utils.data import DataLoader
 
 from .dataclasses import (
+    NetworkParameters,
     TrainingParameters,
     TrainingPerformance,
     ValidationPerformance,
@@ -74,17 +75,18 @@ def train_network_with_stop(
 def train_network(
     training_data: DataLoader,
     training_params: TrainingParameters,
-    network_generator: Callable[[], nn.Module],
+    network_params: NetworkParameters,
+    network_generator: Callable[[NetworkParameters], nn.Module],
 ) -> tuple[TrainingPerformance, nn.Module]:
     training_perf = None
-    network = network_generator()
+    network = network_generator(network_params)
 
     while training_perf is None:
         training_perf = train_network_with_stop(training_data, network, training_params)
 
         if training_perf is None:
             logging.info("Training the network failed, restarting")
-            network = network_generator()
+            network = network_generator(network_params)
         else:
             break
 

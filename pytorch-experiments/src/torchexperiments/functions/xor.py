@@ -7,13 +7,21 @@ import torch.nn as nn
 
 from torchexperiments.torchutils.constants import DEVICE
 from torchexperiments.functions.experiment import Experiment
+from torchexperiments.torchutils.dataclasses import NetworkParameters
+
+DEFAULT_MIDDLE_LAYER_SIZE = 60
 
 
 class _XORNet(nn.Module):
-    def __init__(self):
+    def __init__(self, network_params: NetworkParameters):
         super(_XORNet, self).__init__()
-        self.fc1 = nn.Linear(2, 60)
-        self.fc2 = nn.Linear(60, 1)
+
+        middle_layer_size = network_params.get_first_layer_size(
+            DEFAULT_MIDDLE_LAYER_SIZE
+        )
+
+        self.fc1 = nn.Linear(2, middle_layer_size)
+        self.fc2 = nn.Linear(middle_layer_size, 1)
         self.rl1 = nn.ReLU()
         self.rl2 = nn.ReLU()
 
@@ -26,8 +34,8 @@ class _XORNet(nn.Module):
         return x
 
 
-def _generate_xor_network() -> nn.Module:
-    return _XORNet().to(DEVICE)
+def _generate_xor_network(network_params: NetworkParameters) -> nn.Module:
+    return _XORNet(network_params).to(DEVICE)
 
 
 def _generate_xor_data(n: int):

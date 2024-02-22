@@ -2,8 +2,11 @@ import torch
 import torch.nn as nn
 import torch.optim as optim
 
+ARGPARSE_USE_DEFAULT_STR = "use_default"
+
 DEVICE = torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu")
 
+# From https://pytorch.org/docs/stable/nn.html#loss-functions
 LOSS_FN_TYPES = {
     "l1": nn.L1Loss,
     "smoothl1": nn.SmoothL1Loss,
@@ -28,6 +31,7 @@ LOSS_FN_TYPES = {
     # "tripletmargindistance": nn.TripletMarginWithDistanceLoss, FIX requires a positional argument
 }
 
+# From https://pytorch.org/docs/stable/optim.html#algorithms
 OPTIMIZER_TYPES = {
     "adadelta": optim.Adadelta,
     "adagrad": optim.Adagrad,
@@ -42,4 +46,15 @@ OPTIMIZER_TYPES = {
     "radam": optim.RAdam,
     "rmsprop": optim.RMSprop,
     "rprop": optim.Rprop,
+}
+
+# From https://pytorch.org/docs/stable/nn.html#non-linear-activations-weighted-sum-nonlinearity
+ACTIVATION_TYPES = {
+    "elu": torch.nn.ELU,
+    "relu": torch.nn.ReLU,
+    "silu": torch.nn.SiLU,
+    "sigmoid": torch.nn.Sigmoid,
+    "softplus": torch.nn.Softplus,
+    "softmax": torch.nn.Softmax,
+    "softmin": torch.nn.Softmin,
 }
