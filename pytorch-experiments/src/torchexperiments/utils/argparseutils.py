@@ -6,17 +6,25 @@ from torchexperiments.torchutils.dataclasses import TrainingParameters
 
 def add_training_params_to_parser(parser: argparse.ArgumentParser):
     parser.add_argument(
-        "-ep", "--epochs", type=int, default=5000, help="number of epochs to run"
+        "-ep",
+        "--epochs",
+        type=int,
+        default=5000,
+        help="number of epochs to run (default=5000)",
     )
     parser.add_argument(
-        "-bs", "--batch-size", type=int, default=100, help="number of samples per batch"
+        "-bs",
+        "--batch-size",
+        type=int,
+        default=100,
+        help="number of samples per batch (default=100)",
     )
     parser.add_argument(
         "-lr",
         "--learning-rate",
         type=float,
         default=0.001,
-        help="learning rate of optimizer",
+        help="learning rate of optimizer (default=0.001)",
     )
     parser.add_argument(
         "-lor",
@@ -42,7 +50,7 @@ def add_training_params_to_parser(parser: argparse.ArgumentParser):
         type=str,
         default="mse",
         choices=LOSS_FN_TYPES.keys(),
-        help="loss function to use to compute loss",
+        help="loss function to use to compute loss (default=mse)",
     )
     parser.add_argument(
         "-op",
@@ -50,7 +58,7 @@ def add_training_params_to_parser(parser: argparse.ArgumentParser):
         type=str,
         default="adam",
         choices=OPTIMIZER_TYPES.keys(),
-        help="optimizer to use to learn",
+        help="optimizer to use to learn (default=adam)",
     )
     parser.add_argument(
         "-ei",
